@@ -17,7 +17,7 @@ CREATE TABLE properties (
   description TEXT,
   thumbnail_photo_url VARCHAR(255) NOT NULL,
   cover_photo_url VARCHAR(255) NOT NULL,
-  cost_per_night INTEGER NOT NULL DEFAULT 0,
+  cost_per_night VARCHAR(255) NOT NULL DEFAULT 0,
   parking_spaces INTEGER NOT NULL DEFAULT 0,
   number_of_bathrooms INTEGER NOT NULL DEFAULT 0,
   number_of_bedrooms INTEGER NOT NULL DEFAULT 0,

@@ -77,7 +77,6 @@ const getAllReservations = function(guest_id, limit = 10) {
       [guest_id, limit])
     .then(result => {return Promise.resolve(result.rows)})
     .catch(err => {console.log(err.message)});
-  // return getAllProperties(null, 2);
 }
 exports.getAllReservations = getAllReservations;
 
@@ -90,13 +89,25 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 const getAllProperties = function(options, limit = 10) {
+  const queryValues = [options.city || '', options.owner_id || -1, options.minimum_price_per_night/100 || 0, options.maximum_price_per_night/100 || 999999999, options.minimum_rating || 0, limit];
+
   return pool
-    .query(`SELECT * FROM properties LIMIT $1;`, [limit])
+    .query(`
+      SELECT properties.*, AVG(rating) AS average_rating
+        FROM properties
+          JOIN property_reviews ON properties.id=property_id
+        WHERE city=(CASE WHEN $1='' THEN city ELSE $1 END)
+          AND owner_id=(CASE WHEN $2=-1 THEN owner_id ELSE $2 END)
+          AND cost_per_night>=$3
+          AND cost_per_night<=$4
+        GROUP BY properties.id
+        HAVING AVG(rating)>=$5
+        ORDER BY cost_per_night
+        LIMIT $6;`, queryValues)
     .then(result => {return Promise.resolve(result.rows)})
-    .catch(err => {console.log(err.message)});
+    .catch(err => {console.log(err)});
 }
 exports.getAllProperties = getAllProperties;
-
 
 /**
  * Add a property to the database
